@@ -1,90 +1,181 @@
-# Movie Analysis Pipeline
-
-A project to extract, transform, and load movie data, and perform analysis on top-rated movies and genres.
-
----
+# Movie Pipeline ETL Project
 
 ## Table of Contents
-- [Overview](#overview)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Database Schema](#database-schema)
-- [Queries](#queries)
-- [Design Choices](#design-choices)
-- [Challenges](#challenges)
-- [License](#license)
+
+* [Overview](#overview)
+* [Tech Stack](#tech-stack)
+* [Folder Structure](#folder-structure)
+* [Setup](#setup)
+* [ETL Pipeline](#etl-pipeline)
+* [Database Schema](#database-schema)
+* [Queries](#queries)
+* [Design Choices](#design-choices)
+* [Challenges](#challenges)
+* [License](#license)
 
 ---
 
 ## Overview
-This project builds a simple movie analytics pipeline. It performs the following:
-1. Loads movie, user, and ratings data into a MySQL database.
-2. Performs SQL queries to find highest-rated movies and top genres.
-3. Can be extended to include visualizations or advanced analytics.
+
+This project implements an end-to-end **ETL (Extract, Transform, Load) pipeline** for the MovieLens dataset using Python, MySQL, and SQL.
+It enriches the dataset with additional metadata from the OMDb API and loads cleaned and structured data into a relational database.
+
+The project demonstrates skills in:
+
+* Data extraction, transformation, and loading
+* API integration
+* SQL database design and queries
+* Python programming for data engineering tasks
+
+---
+
+## Tech Stack
+
+* Python 3.x
+* Pandas
+* SQLAlchemy
+* MySQL / MariaDB
+* OMDb API
+* VS Code
+
+---
+
+## Folder Structure
+
+```
+movie_pipeline/
+├── etl.py               # Main ETL script
+├── schema.sql           # SQL to create database schema
+├── queries.sql          # Analytical SQL queries
+├── README.md            # Project documentation
+├── requirements.txt     # Python dependencies
+├── .gitignore           # Git ignore rules
+├── .venv/               # Local virtual environment (ignored)
+├── data/                # Raw data & cache (ignored)
+│   ├── movies.dat
+│   ├── ratings.dat
+│   └── omdb_cache.csv
+└── .env                 # Environment variables (ignored)
+```
 
 ---
 
 ## Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
-   cd your-repo-name
+1. **Clone repository:**
 
+```bash
+git clone https://github.com/pavi-pavani/movie_pipeline.git
+cd movie_pipeline
+```
 
-2. Install dependencies:
-   pip install -r requirements.txt
+2. **Create virtual environment:**
 
-3. Create database tables:
-   mysql -u your_user -p movie_db < schema.sql
+```bash
+python -m venv .venv
+```
 
-4. Run the ETL script:
-   python etl.py
+3. **Activate virtual environment:**
 
+* Windows:
 
-## Usage
-After running the ETL script, your database will be populated.  
-Run the SQL queries in `queries.sql` to find:
-- Highest rated movie
-- Top 5 genres by average rating
-- Who is the director with the most movies in this dataset
-- What is the average rating of movies released each year
+```bash
+.venv\Scripts\activate
+```
+
+* Mac/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+4. **Install dependencies:**
+
+```bash
+pip install -r requirements.txt
+```
+
+5. **Set up environment variables:**
+   Create a `.env` file with your credentials:
+
+```
+OMDB_API_KEY=your_omdb_api_key
+DATABASE_URL=mysql+mysqlconnector://username:password@localhost:3306/moviedb
+```
+
+---
+
+## ETL Pipeline
+
+**`etl.py`** performs the following steps:
+
+1. Load MovieLens `movies.dat` and `ratings.dat`.
+2. Fetch additional movie metadata from the OMDb API (or load cached CSV).
+3. Clean and transform data:
+
+   * Extract year from title and normalize genres
+   * Handle missing values
+   * Convert box office and IMDb ratings to numeric
+4. Create database tables:
+
+   * `movies`, `genres`, `movie_genres`, `ratings`
+5. Load data into MySQL using SQLAlchemy.
+
+---
 
 ## Database Schema
 
-This project uses a MySQL database with the following tables:
+* **movies**:
+  `movieid`, `title`, `year`, `director`, `plot`, `boxoffice`, `imdbrating`, `released`
 
-| Table   | Columns                                      | Description |
-|---------|---------------------------------------------|-------------|
-| movies  | movieId (PK), title, genre                  | Stores movie information, including title and genre. |
-| users   | userId (PK), username, email                | Stores user information. |
-| ratings | ratingId (PK), userId (FK), movieId (FK), rating, timestamp | Stores user ratings for movies, linking users and movies with foreign keys. |
+* **genres**:
+  `genre_id`, `genre`
 
-# Notes
-- **Primary Keys (PK)** ensure each record is unique.  
-- **Foreign Keys (FK)** enforce relationships between tables (users → ratings, movies → ratings).  
-- **Data types** are chosen to optimize storage and maintain data integrity (e.g., rating INT 1-5).  
+* **movie_genres**:
+  `movieid`, `genre_id` (many-to-many mapping)
 
+* **ratings**:
+  `rating_id`, `userid`, `movieid`, `rating`, `timestamp`
+
+*(Refer to `schema.sql` for full SQL definitions.)*
+
+---
 
 ## Queries
-- Find the highest rated movie
-- Find the top 5 genres by average rating
 
+Analytical SQL queries are saved in **`queries.sql`**, including:
+
+1. Highest rated movie
+2.  Top 5 genres by average rating
+3.  Who is the director with the most movies in this dataset
+4 . What is the average rating of movies released each year
+
+---
 
 ## Design Choices
-- Ratings are integers from 1 to 5
-- Foreign keys maintain relationships between tables
-- Handled duplicates during ETL
 
+* Normalized database with separate `genres` and `movie_genres` tables
+* Cached OMDb API data to avoid repeated API calls
+* Cleaned and converted all numeric and date fields for consistency
+* Modular ETL code to allow easy re-run and expansion
+
+---
 
 ## Challenges
-- Handling missing values and nulls in the data
-- Avoiding duplicate movie entries during ETL
-- by joining tables foreign key issues
+
+* Handling missing or inconsistent data in MovieLens and OMDb API
+* Converting box office and IMDb ratings to numeric values
+* Avoiding API overuse with caching
+* Managing many-to-many genre mapping in SQL
+* By joining tables foreign key issues
+* Handling missing values and nulls in the data
+* Avoiding duplicate movie entries during ETL
+
+---
 
 ## License
-This project is for demonstration purposes and personal portfolio use.
 
+This project is for **educational and interview purposes only**.
 
 
 
