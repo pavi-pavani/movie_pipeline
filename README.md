@@ -148,7 +148,7 @@ Analytical SQL queries are saved in **`queries.sql`**, including:
 1. Highest rated movie
 2.  Top 5 genres by average rating
 3.  Who is the director with the most movies in this dataset
-4 . What is the average rating of movies released each year
+4.  What is the average rating of movies released each year
 
 ---
 
