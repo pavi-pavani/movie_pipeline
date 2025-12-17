@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from sqlalchemy import create_engine, text   # ✅ Add `text` here
+from sqlalchemy import create_engine, text   
 from dotenv import load_dotenv
 import os
 import time
